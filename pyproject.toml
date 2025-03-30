@@ -1,0 +1,29 @@
+[project]
+name = "mailing-service"
+version = "0.1.0"
+description = "A Django web application that allows users to manage mailing lists for clients. The application includes functionality for creating, viewing, editing, and deleting mailing lists, as well as sending messages on demand."
+authors = [
+    {name = "Artur Koltyrin"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "django (>=5.1.7,<6.0.0)",
+    "pytest (>=8.3.5,<9.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.lint.dependencies]
+mypy = "^1.15.0"
+black = "^25.1.0"
+isort = "^6.0.1"
+flake8 = "^7.2.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest-cov = "^6.0.0"
+
