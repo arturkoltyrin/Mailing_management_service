@@ -1,0 +1,30 @@
+<!-- register.html -->
+
+
+{% extends "mailing/base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+
+
+<div class="container">
+    <div class="row d-flex justify-content-center text-start">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="card mt-4 mb-4 shadow-sm">
+                <div class="card-body">
+                    <h2>Регистрация</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-outline-primary">Зарегистрироваться</button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
