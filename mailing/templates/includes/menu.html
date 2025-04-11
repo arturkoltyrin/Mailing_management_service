@@ -18,6 +18,7 @@
             <ul class="nav flex-column">
 
                 {% if user.is_authenticated %}
+
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center gap-2 active" aria-current="page" href="{% url 'mailing:index' %}">
                         <svg class="bi">
@@ -58,14 +59,17 @@
                         Информация о рассылках
                     </a>
                 </li>
-
-
-
-
+                <nav>
+                <a href="{% url 'clients:list' %}">Клиенты</a>
+                </nav>
+                <nav>
+                <a href="{% url 'mailing:mailing_list' %}">Рассылки</a>
+                </nav>
+                <nav>
+                <a href="{% url 'mailing:message_list' %}">Сообщения</a>
+                </nav>
             <hr class="my-3">
             {% endif %}
-
-
             <ul class="nav flex-column mb-auto">
 
                 {% if perms.users.can_block_user %}

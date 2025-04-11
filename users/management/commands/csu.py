@@ -7,7 +7,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         User = get_user_model()
         user = User.objects.create(email="admin@admin.ru")
-        user.set_password("123")
+        user.set_password("Zq123456")
         user.is_staff = True
         user.is_superuser = True
         user.save()

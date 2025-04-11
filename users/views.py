@@ -9,6 +9,7 @@ from config.settings import DEFAULT_FROM_EMAIL
 from .forms import CustomUserCreationForm
 from .models import CustomUser
 from django.http import HttpResponseForbidden
+from django.contrib.auth.forms import UserCreationForm
 
 
 class UserListView(LoginRequiredMixin, ListView):
