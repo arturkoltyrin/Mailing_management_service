@@ -1,0 +1,57 @@
+{% extends 'mailing/base.html' %}
+{% load my_tags %}
+{% block content %}
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center mt-5">
+            {% if user.is_authenticated %}
+            <h2 class="row justify-content-center">Приветствуем Вас {{user.email}} на нашем сайте</h2>
+            {% else %}
+            <h2 class="row justify-content-center">Приветствуем Вас на нашем сайте , зарегистируйтесь чтобы видеть рассылки</h2>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-4"></div>
+    <div class="col-4 ">
+        <ul class="list-group px-3 py-3 pt-md-5 pb-md-4 mx-auto ml-auto">
+            {% if user.is_superuser %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'mailing:mailing_list' %}">Создано рассылок: </a>
+                <span class="badge bg-dark rounded-pill">
+                {{ count_mailing|default:"Нет данных" }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'mailing:mailing_list' %}">Количество активных рассылок: </a>
+                <span class="badge bg-dark rounded-pill">
+                <p>{{ active_mailings_count|default:"Нет данных" }}</p>
+</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="{% url 'mailing:receivemail_list' %}">Количество уникальных получателей: </a>
+                <span class="badge bg-dark rounded-pill">
+                    {{ unique_clients_count|default:"Нет данных" }}
+                </span>
+            </li>
+            {% else %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Создано рассылок:
+                <span class="badge bg-dark rounded-pill">{{ count_mailing }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Количество активных рассылок:
+                <span class="badge bg-dark rounded-pill">{{ active_mailings_count }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Количество уникальных получателей:
+                <span class="badge bg-dark rounded-pill">{{ unique_clients_count }}</span>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="col-4"></div>
+</div>
+{% endblock %}

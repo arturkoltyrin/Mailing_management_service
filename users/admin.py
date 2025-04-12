@@ -1,7 +1,18 @@
 from django.contrib import admin
-from .models import CustomUser
+from users.models import User
 
 
-@admin.register(CustomUser)
-class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ("id", "email")
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "avatar",
+        "email",
+        "first_name",
+        "last_name",
+        "middle_name",
+        "phone",
+        "country",
+    )
+    search_fields = ("email",)
+    list_filter = ("email",)

@@ -1,32 +1,53 @@
 from django import forms
-from .models import Message, Recipient, Mailing
+from django.forms import BooleanField, ModelForm
+from .models import AttemptMailing, Mailing, Message, ReceiveMail
 
 
-class MailingForm(forms.ModelForm):
-    class Meta:
-        model = Mailing
-        fields = "__all__"
-        exclude = ["owner"]
-        widgets = {"recipients": forms.CheckboxSelectMultiple()}
-
+class StyleFormMixin:
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
-
-        if user:
-            self.fields["recipients"].queryset = Recipient.objects.filter(owner=user)
-            self.fields["message"].queryset = Message.objects.filter(owner=user)
-
-
-class RecipientForm(forms.ModelForm):
-    class Meta:
-        model = Recipient
-        fields = "__all__"
-        exclude = ["owner"]
+        for fild_name, fild in self.fields.items():
+            if isinstance(fild, BooleanField):
+                fild.widget.attrs["class"] = "form-check-input"
+            else:
+                fild.widget.attrs["class"] = "form-control"
 
 
-class MessageForm(forms.ModelForm):
+class EmailForm(forms.Form):
+    subject = forms.CharField(max_length=255, label="Тема письма")
+    message = forms.CharField(widget=forms.Textarea, label="Сообщение")
+    recipients = forms.CharField(widget=forms.Textarea, label="Получатели")
+
+
+class MailingForm(StyleFormMixin, ModelForm):
     class Meta:
         model = Message
         fields = "__all__"
-        exclude = ["owner"]
+        #exclude = ("set_is_active", "owner", "first_sending", "end_sending")
+
+
+class MessageForm(StyleFormMixin, ModelForm):
+
+    class Meta:
+        model = Message
+        fields = "__all__"
+
+
+class ReceiveMailForm(StyleFormMixin, ModelForm):
+
+    class Meta:
+        model = ReceiveMail
+        fields = "__all__"
+        exclude = ("can_blocking_client", "owner")
+
+
+class ReceiveMailModeratorForm(StyleFormMixin, ModelForm):
+    class Meta:
+        model = ReceiveMail
+        fields = "__all__"
+
+
+class MailingModeratorForm(StyleFormMixin, ModelForm):
+    class Meta:
+        model = Mailing
+        fields = "__all__"

@@ -1,0 +1,37 @@
+{% extends 'mailing/base.html' %}
+{% load static %}
+{% block content %}
+<main class="flex-shrink-0">
+  <div class="container">
+    <h1 class="mt-5">Пользователи</h1>
+    <div class="container">
+    <div class="row mb-2">
+    <div class="col-md-12">
+    {% for object in object_list %}
+      <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+        <div class="col p-4 d-flex flex-column position-static">
+          <strong class="d-inline-block mb-2 text-primary-emphasis">email: {{object.email}}</strong>
+          <strong class="d-inline-block mb-2 text-primary-emphasis">Имя: {{object.first_name}}</strong>
+          <strong class="d-inline-block mb-2 text-primary-emphasis">Фамилия: {{object.last_name}}</strong>
+          <strong class="d-inline-block mb-2 text-primary-emphasis">Активность: {{ object.is_active |yesno:"Активна, Не активна" }}</strong>
+          <strong class="d-inline-block mb-2 text-primary-emphasis">Телефон: {{object.phone}}</strong>
+          <strong class="d-inline-block mb-2 text-primary-emphasis">Страна: {{object.country}}</strong>
+          <strong class="d-inline-block mb-2 text-primary-emphasis">Аватар: {{object.country}}</strong>
+        </div>
+
+        <div class="row mb-2">
+        <div class="col-md-12">
+        {% if user.is_superuser %}
+          <a class="btn btn-dark" href="{% url 'users:user_update' object.pk %}" role="button">Редактировать</a>
+          <a class="btn btn-dark" href="{% url 'users:user_delete' object.pk %}" role="button">Удалить</a>
+        {% endif %}
+        </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+    </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

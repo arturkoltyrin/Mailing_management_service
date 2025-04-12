@@ -1,69 +1,77 @@
 {% extends 'mailing/base.html' %}
-
-{% block title %}Управление рассылками{% endblock %}
-
 {% block content %}
+{% load my_tags %}
+<div class="container marketing mt-5">
+    <div class="container text-center mt-3">
+        <div class="row justify-content-center">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <h2>Рассылки</h2>
+                {% if user.is_authenticated %}
+                    <a class="btn btn-success mt-3" href="{% url 'mailing:mailing_create' %}">Создать рассылку &raquo;</a></p>
+                {% endif %}
+            </div>
+            <div class="col-4"></div>
+        </div>
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h2>Управление рассылками</h2>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a class="btn btn-outline-primary" href="{% url 'mailing:mailing_create' %}">Добавить</a>
     </div>
+    <div class="row">
+        <div class="table-responsive small">
+            <table class="table table-success table-striped">
+                <thead>
+                <tr>
+                    <th>Сообщение</th>
+                    <th>Время начала</th>
+                    <th>Время окончания</th>
+                    <th>Тема сообщения</th>
+                    <th>Статус</th>
+                    <th>Активность</th>
+                    {% if user.is_superuser %}
+                    <th>Создал</th>
+                    {% endif %}
+                    <th>Действия</th>
+                </tr>
+                </thead>
+
+                {% for object in object_list %}
+                <tr>
+                    <td>{{ object.message|truncatechars:30 }}</td>
+                    <td>{{ object.first_sending|date:"d M Y" }}</td>
+                    <td>{{ object.end_sending|date:"d M Y" }}</td>
+                    <td>{{ object.message.subject }}</td>
+                    <td>{{ object.status }}</td>
+                    <td>
+                        {% if user.is_superuser %}
+                        {% if object.is_active %}
+                                <a type="button" class="btn btn-danger btn-sm"
+                                   href="{% url 'mailing:block_mailing' object.pk %}">Заблокировать</a>
+                            {% else %}
+                                <a type="button" class="btn btn-success btn-sm"
+                                   href="{% url 'mailing:block_mailing' object.pk %}">Разблокировать</a>
+                            {% endif %}
+                        {% else %}
+                        {{object.is_active|yesno:"Активна, Не активна"}}
+                        {% endif %}
+                    </td>
+                    {% if user.is_authenticated %}
+                    <td>{{ object.owner }}</td>
+                    {% endif %}
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="{% url 'mailing:mailing_detail' object.pk%}">Посмотреть </a>
+                        {% if user.is_authenticated %}
+                        <a class="btn btn-primary btn-sm" href="{% url 'mailing:mailing_update' object.pk%}">Редактировать</a>
+                        <a class="btn btn-danger btn-sm" href="{% url 'mailing:mailing_delete' object.pk%}">Удалить</a>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                        <a class="btn btn-secondary btn-sm" href="{% url 'mailing:run_mail' object.pk%}">Запустить &raquo;</a>
+                        {% endif %}
+                    </td>
+
+                </tr>
+                {% endfor%}
+            </table>
+
+        </div><!-- /.row -->
+    </div><!-- /.container -->
 </div>
-
-
-<div class="table-responsive small">
-    <table class="table table-striped table-sm">
-        <thead>
-        <tr>
-            <th scope="col">id</th>
-            <th scope="col">Дата и время первой отправки</th>
-            <th scope="col">Дата и время окончания отправки</th>
-            <th scope="col">Статус автоматической рассылки</th>
-            <th scope="col">Сообщение</th>
-            <th scope="col">Получатели</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for mailing in object_list %}
-        <tr>
-            <td>{{ mailing.id }}</td>
-            <td>{{ mailing.first_send_at }}</td>
-            <td>{{ mailing.finish_send_at }}</td>
-            <td>{{ mailing.status }}
-            {% if mailing.owner == user or is_manager %}
-                {% if mailing.status != "completed" %}
-                <form action="{% url 'mailing:mailing_stop' mailing.pk %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger btn-sm">Завершить/отключить</button>
-                </form>
-                {% endif %}
-                {% endif %}
-            </td>
-            <td>{{ mailing.message }}</td>
-            <td>
-
-                {% for recipient in mailing.recipients.all %}
-                {{ recipient.email }}<br>
-                {% endfor %}
-
-
-            </td>
-
-            <td class="text-end">
-                {% if mailing.owner == user %}
-
-                <a class="btn btn-outline-primary" href="{% url 'mailing:mailing_detail' mailing.pk%}">Разослать вручную</a>
-
-                <a class="btn btn-outline-primary" href="{% url 'mailing:mailing_update' mailing.pk%}">Изменить</a>
-                <a class="btn btn-outline-danger" href="{% url 'mailing:mailing_delete' mailing.pk%}">Удалить</a>
-                {% endif %}
-            </td>
-
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-{% endblock %}
+{% endblock %}}

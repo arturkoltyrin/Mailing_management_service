@@ -1,0 +1,74 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+ <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-danger">
+    <div class="container-fluid">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="row">
+            <div class="col-8">
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav me-auto mb-1 mb-md-0">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="{% url 'mailing:home' %}">Главная</a>
+                        </li>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link " aria-current="page"
+                               href="{% url 'mailing:mailing_list' %}">Рассылки</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'mailing:receivemail_list' %}">Получатели</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'mailing:message_list' %}">Сообщения</a>
+                        </li>
+                        {% endif %}
+                        {% load my_tags %}
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'mailing:attempt' %}">Статистика</a>
+                        </li>
+                         <li>
+                             <a class="nav-link" href="{% url 'mailing:contacts' %}">Контакты</a>
+                         </li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                               aria-expanded="false">Пользователь</a>
+
+
+                            <ul class="dropdown-menu">
+                                {% if user.is_authenticated %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'users:logout' %}" method="post">Выход</a>
+                                </li>
+                                 {% if user.is_authenticated %}
+                                <li><a class="dropdown-item" href="{% url 'users:user_detail' user.pk%}">Профиль</a></li>
+
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'users:user_list' %}">Список пользователей</a>
+                                </li>
+
+                                {% endif %}
+                                {% else %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'users:login' %}">Вход</a>
+                                </li>
+                                <li><a class="dropdown-item" href="{% url 'users:register' %}">Регистрация</a></li>
+
+                                {%endif%}
+
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</nav>

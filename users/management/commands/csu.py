@@ -1,14 +1,14 @@
-from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management import BaseCommand
+
+from users.models import User
 
 
 class Command(BaseCommand):
-
     def handle(self, *args, **options):
-        User = get_user_model()
-        user = User.objects.create(email="admin@admin.ru")
-        user.set_password("Zq123456")
+        user = User.objects.create(email="admin@example.com")
+        user.set_password("123qwe")
+        user.is_active = True
         user.is_staff = True
         user.is_superuser = True
         user.save()
-        self.stdout.write(self.style.SUCCESS(f"Успешно создан суперпользователь с email {user.email}"))
+

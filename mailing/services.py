@@ -1,38 +1,78 @@
+from django.utils import timezone
 from django.core.cache import cache
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from config.settings import CACHE_ENABLED, EMAIL_HOST_USER
+from mailing.models import AttemptMailing, Mailing
 
-from .models import CustomUser, Mailing, MailingAttempt, Recipient
+
+def run_mail(request, pk):
+    """Функция запуска рассылки по требованию"""
+    mailing = get_object_or_404(Mailing, id=pk)
+    for recipient in mailing.client.all():
+        try:
+            mailing.status = Mailing.LAUNCHED
+            send_mail(
+                subject=mailing.message.subject,
+                message=mailing.message.content,
+                from_email=EMAIL_HOST_USER,
+                recipient_list=[recipient.mail],
+                fail_silently=False,
+            )
+            AttemptMailing.objects.create(
+                date_attempt=timezone.now(),
+                status=AttemptMailing.STATUS_OK,
+                server_response="Email отправлен",
+                mailing=mailing,
+            )
+        except Exception as e:
+            print(f"Ошибка при отправке письма для {recipient.email}: {str(e)}")
+            AttemptMailing.objects.create(
+                date_attempt=timezone.now(),
+                status=AttemptMailing.STATUS_NOK,
+                server_response=str(e),
+                mailing=mailing,
+            )
+    if mailing.end_sending and mailing.end_sending <= timezone.now():
+
+        mailing.status = Mailing.COMPLETED
+    mailing.save()
+    return redirect("mailing:mailing_list")
 
 
-def get_index_page_cache_data(user: CustomUser) -> dict:
-    """Функция возвращает кешированные данные для главной страницы"""
+def get_mailing_from_cache():
+    """Получение данных по рассылкам из кэша, если кэш пуст берем из БД."""
 
-    context_from_cache = cache.get(f"index_page_data/{user.email}")
-    if context_from_cache:
-        return context_from_cache
+    if not CACHE_ENABLED:
+        return Mailing.objects.all()
+    key = "mailing_list"
+    cache_mail = cache.get(key)
+    if cache_mail is not None:
+        return cache_mail
+    cache_mail = Mailing.objects.all()
+    cache.set(cache_mail, key)
+    return cache_mail
 
-    context_update = {}
-    if user.groups.filter(name="Менеджер").exists():
-        mailing_attempt = MailingAttempt.objects.all()
-        mailing = Mailing.objects.all()
-        recipient = Recipient.objects.all()
 
-    else:
-        mailing_attempt = MailingAttempt.objects.filter(mailing__owner=user.id)
-        mailing = Mailing.objects.filter(owner=user.id)
-        recipient = Recipient.objects.filter(owner=user.id)
+def get_attempt_from_cache():
+    """Получение данных по попыткам  из кэша, если кэш пуст берем из БД."""
 
-    attempt_count = mailing_attempt.count()
-    attempt_success_count = mailing_attempt.filter(status="success").count()
-    attempt_failure_count = mailing_attempt.filter(status="failure").count()
-    mailing_count = mailing.count()
-    mailing_running_count = mailing.filter(status="running").count()
-    recipient_count = recipient.count()
-    context_update["object_list"] = mailing_attempt
-    context_update["attempt_count"] = attempt_count
-    context_update["attempt_success_count"] = attempt_success_count
-    context_update["attempt_failure_count"] = attempt_failure_count
-    context_update["mailing_count"] = mailing_count
-    context_update["mailing_running_count"] = mailing_running_count
-    context_update["recipient_count"] = recipient_count
-    cache.set(f"index_page_data/{user.email}", context_update, 5)
-    return context_update
+    if not CACHE_ENABLED:
+        return AttemptMailing.objects.all()
+    key = "attempt_list"
+    cache_attempt = cache.get(key)
+    if cache_attempt is not None:
+        return cache_attempt
+    cache_mail = Mailing.objects.all()
+    cache.set(cache_attempt, key)
+    return cache_attempt
+
+
+@login_required
+def block_mailing(request, pk):
+    mailing = Mailing.objects.get(pk=pk)
+    mailing.is_active = {mailing.is_active: False, not mailing.is_active: True}[True]
+    mailing.save()
+    return redirect(reverse("mailing:mailing_list"))

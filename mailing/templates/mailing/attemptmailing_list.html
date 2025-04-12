@@ -1,0 +1,48 @@
+{% extends 'mailing/base.html' %}
+{% block content %}
+<div class="container marketing mt-5">
+    <div class="container text-center mt-3">
+        <div class="row justify-content-center">
+            <div class="col-4"></div>
+            <div class="col-4">
+                <h2>Статистика по рассылкам</h2>
+            </div>
+            <div class="col-4"></div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="table-responsive small">
+            <table class="table table-success table-striped">
+                <thead>
+                <tr>
+                    <th>Тема сообщения</th>
+                    <th>Описание рассылки</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                    <th>Ответ сервера</th>
+                    {% if user.is_authenticated %}
+                    <th>Создал</th>
+                    {% endif %}
+                </tr>
+                </thead>
+
+                {% for object in object_list %}
+                <tr>
+                    <td>{{ object.mailing.message.subject }}</td>
+                    <td>{{ object.mailing.message.content|truncatechars:30 }}</td>
+                    <td>{{ object.date_attempt}}</td>
+                    <td>{{ object.status}}</td>
+                    <td>{{ object.response}}</td>
+                    {% if user.is_authenticated %}
+                    <td>{{ object.mailing.owner }}</td>
+                    {% endif %}
+
+                </tr>
+                {% endfor%}
+            </table>
+
+        </div><!-- /.row -->
+    </div><!-- /.container -->
+</div>
+{% endblock %}}

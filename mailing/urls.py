@@ -1,32 +1,39 @@
-from django.urls import path, include
-from . import views
+from django.urls import path
 from django.views.decorators.cache import cache_page
-from django.contrib.auth import views as auth_views
-from users.views import RegisterView
+from mailing.apps import MailingConfig
+from mailing.services import block_mailing, run_mail
+from mailing.views import (Contacts, MailingAttemptCreateView, MailingAttemptListView, MailingCreateView,
+                           MailingDeleteView, MailingDetailView,
+                           MailingListView, MailingUpdateView, MessageCreateView, MessageDeleteView,
+                           MessageDetailView, MessageListView,
+                           MessageUpdateView, ReceiveMailCreateView, ReceiveMailDetailView, ReceiveMailingDeleteView,
+                           ReceiveMailListView,
+                           ReceiveMailUpdateView, homeView, Messages)
 
-app_name = "mailing"
+app_name = MailingConfig.name
 
 urlpatterns = [
-    path("", views.IndexView.as_view(), name="index"),
-    path("recipient_list", cache_page(5*60)(views.RecipientListView.as_view()), name="recipient_list",),
-    path("recipient/create", views.RecipientCreateView.as_view(), name="recipient_create"),
-    path("recipient/<int:pk>/update", views.RecipientUpdateView.as_view(), name="recipient_update"),
-    path("recipient/<int:pk>/delete", views.RecipientDeleteView.as_view(), name="recipient_delete"),
-    path("message_list", cache_page(5*60)(views.MessageListView.as_view()), name="message_list"),
-    path("message/create", views.MessageCreateView.as_view(), name="message_create"),
-    path("message/<int:pk>/update", views.MessageUpdateView.as_view(), name="message_update"),
-    path("message/<int:pk>/delete", views.MessageDeleteView.as_view(), name="message_delete"),
-    path("mailing_list", cache_page(5*60)(views.MailingListView.as_view()), name="mailing_list"),
-    path("mailing/create", views.MailingCreateView.as_view(), name="mailing_create"),
-    path("mailing/<int:pk>/update", views.MailingUpdateView.as_view(), name="mailing_update"),
-    path("mailing/<int:pk>/delete", views.MailingDeleteView.as_view(), name="mailing_delete"),
-    path("mailing/<int:pk>", views.MailingDetailView.as_view(), name="mailing_detail"),
-    path("mailing/<int:pk>/stop", views.MailingStopView.as_view(), name="mailing_stop"),
-    path("mailingattempt_list", cache_page(5*60)(views.MailingAttemptListView.as_view()), name="mailingattempt_list"),
-    path('register/', RegisterView.as_view(), name='register'),
-    path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
-    path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
-    path('clients/', include('clients.urls', namespace='clients')),
+    path("home/", homeView.as_view(), name="home"),
+    path("contacts/", cache_page(60)(Contacts.as_view()), name="contacts"),
+    path("message/", Messages.as_view(), name="message"),
+    path("mailing/", MailingListView.as_view(), name="mailing_list"),
+    path("mailing/<int:pk>/run_mail/", run_mail, name="run_mail"),
+    path("mailing/<int:pk>/detail/", MailingDetailView.as_view(), name="mailing_detail"),
+    path("mailing/new/", MailingCreateView.as_view(), name="mailing_create"),
+    path("mailing/<int:pk>/edit/", MailingUpdateView.as_view(), name="mailing_update"),
+    path("mailing/<int:pk>/delete/", MailingDeleteView.as_view(), name="mailing_delete"),
+    path("receivemail/", ReceiveMailListView.as_view(), name="receivemail_list"),
+    path("receivemail/<int:pk>/detail/", cache_page(60)(ReceiveMailDetailView.as_view()), name="receivemail_detail"),
+    path("receivemail/create/", ReceiveMailCreateView.as_view(), name="receivemail_form"),
+    path("receivemail/<int:pk>/edit/", ReceiveMailUpdateView.as_view(), name="receivemail_update"),
+    path("receivemail/<int:pk>/delete/", ReceiveMailingDeleteView.as_view(), name="receivemail_delete"),
+    path("message/", MessageListView.as_view(), name="message_list"),
+    path("message/<int:pk>/detail/", MessageDetailView.as_view(), name="message_detail"),
+    path("message/new/", MessageCreateView.as_view(), name="message_create"),
+    path("message/<int:pk>/edit/", MessageUpdateView.as_view(), name="message_update"),
+    path("message/<int:pk>/delete/", MessageDeleteView.as_view(), name="message_delete"),
+    path("send/", MailingAttemptListView.as_view(), name="send_list"),
+    path("send/create/", MailingAttemptCreateView.as_view(), name="send_create"),
+    path("attempt/", MailingAttemptListView.as_view(), name="attempt"),
+    path("block_mailing/<int:pk>", block_mailing, name="block_mailing"),
 ]

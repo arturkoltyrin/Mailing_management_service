@@ -1,44 +1,59 @@
 {% extends 'mailing/base.html' %}
 
-{% block title %}Рассылаемые сообщения{% endblock %}
-
 {% block content %}
+<div class="container marketing mt-5">
+    <div class="container text-center mt-3">
+        <div class="row justify-content-center">
+            <div class="col-4">
 
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h2>Рассылаемые сообщения</h2>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a class="btn btn-outline-primary" href="{% url 'mailing:message_create' %}">Добавить</a>
+            </div>
+            <div class="col-4">
+                <h2>Сообщения</h2>
+                <a class="btn btn-success mt-3" href="{% url 'mailing:message_create' %}">Добавить сообщение
+                    &raquo;</a></p>
+            </div>
+            <div class="col-4">
+
+            </div>
+        </div>
+
     </div>
-</div>
+    <div class="row">
+        <div class="table-responsive small">
+            <table class="table table-success table-striped">
+                <thead>
+                <tr>
+                    <th>Тема</th>
+                    <th>Сообщение</th>
+                    {% if user.is_authenticated %}
+                    <th>Создал</th>
+                    {% endif %}
+                    <th>Действия</th>
+                </tr>
+                </thead>
+
+                {% for object in object_list %}
+                <tr>
+                    <td>{{ object.subject }}</td>
+                    <td>{{ object.content|truncatechars:30 }}</td>
+                    {% if user.is_authenticated %}
+                    <td>{{ object.owner }}</td>
+                    {% endif %}
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="{% url 'mailing:message_detail' object.pk%}">Посмотреть
+                            &raquo;</a>
+                        <a class="btn btn-primary btn-sm" href="{% url 'mailing:message_update' object.pk%}">Редактировать
+                            &raquo;</a>
+                        <a class="btn btn-danger btn-sm" href="{% url 'mailing:message_delete' object.pk%}">Удалить</a>
+                    </td>
+
+                </tr>
+                {% endfor%}
+            </table>
+
+        </div><!-- /.row -->
 
 
-<div class="table-responsive small">
-    <table class="table table-striped table-sm">
-        <thead>
-        <tr>
-            <th scope="col">id</th>
-            <th scope="col" >Тема письма</th>
-            <th scope="col">Тело письма</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for message in object_list %}
-        <tr>
-            <td>{{ message.id }}</td>
-            <td style="width: 20vh;">{{ message.title }}</td>
-            <td>{{ message.message }}</td>
-            {% if message.owner == user %}
-            <td class="text-end" style="width: 20vh;">
-                <a class="btn btn-outline-primary" href="{% url 'mailing:message_update' message.pk%}">Изменить</a>
-                <a class="btn btn-outline-danger" href="{% url 'mailing:message_delete' message.pk%}">Удалить</a>
-            </td>
-            {% else %}
-            <td class="text-end" style="width: 20vh;"></td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-
+    </div><!-- /.row -->
+</div><!-- /.container -->
 {% endblock %}
