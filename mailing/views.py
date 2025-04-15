@@ -43,7 +43,7 @@ class Contacts(TemplateView):
 
 
 # Страница ответа на отправленное сообщение
-class Messages(TemplateView):
+class Messages(ListView):
 
     template_name = "mailing/message_list.html"
 
@@ -64,10 +64,9 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("mailing:mailing_list")
 
     def form_valid(self, form):
-        recipient = form.save()
-        recipient.owner = self.request.user
-        recipient.save()
+        form.instance.owner = self.request.user  # автоматически проставляется владелец
         return super().form_valid(form)
+
 
 
 class MailingDetailView(LoginRequiredMixin, DetailView):
@@ -100,8 +99,13 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
 # CRUD для получателей
 
 
-class ReceiveMailListView(ListView):
+class ReceiveMailListView(LoginRequiredMixin, ListView):
     model = ReceiveMail
+    template_name = 'mailing/receivemail_list.html'
+    context_object_name = 'Получатель'
+
+    def get_queryset(self):
+        return ReceiveMail.objects.filter(owner=self.request.user)
 
 
 class ReceiveMailDetailView(LoginRequiredMixin, DetailView):
@@ -152,10 +156,13 @@ class ReceiveMailingDeleteView(LoginRequiredMixin, DeleteView):
 
 
 # CRUD для сообщений
-class MessageListView(ListView):
+class MessageListView(LoginRequiredMixin, ListView):
     model = Message
-    form_class = MessageForm
     template_name = 'mailing/message_list.html'
+    context_object_name = 'письмо'
+
+    def get_queryset(self):
+        return Message.objects.filter(owner=self.request.user)
 
     def get_queryset(self, *args, **kwargs):
 
@@ -167,6 +174,7 @@ class MessageListView(ListView):
 class MessageDetailView(LoginRequiredMixin, DetailView):
     model = Message
     form_class = MessageForm
+    template_name = 'mailing/message_detail.html'
 
     def get_object(self, queryset=None):
         self.object = super().get_object(queryset)
@@ -182,6 +190,10 @@ class MessageCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("mailing:message_list")
 
     def form_valid(self, form):
+        form.instance.owner = self.request.user  # автоматически устанавливаем владельца
+        return super().form_valid(form)
+
+    def form_valid(self, form):
         recipient = form.save()
         recipient.owner = self.request.user
         recipient.save()
@@ -191,6 +203,7 @@ class MessageCreateView(LoginRequiredMixin, CreateView):
 class MessageUpdateView(LoginRequiredMixin, UpdateView):
     model = Message
     form_class = MessageForm
+    template_name = 'mailing/message_form.html'
     success_url = reverse_lazy("mailing:message_list")
 
     def get_object(self, queryset=None):
@@ -202,6 +215,7 @@ class MessageUpdateView(LoginRequiredMixin, UpdateView):
 
 class MessageDeleteView(LoginRequiredMixin, DeleteView):
     model = Message
+    template_name = 'mailing/message_delete.html'
     success_url = reverse_lazy("mailing:message_list")
 
     def get_object(self, queryset=None):

@@ -50,7 +50,7 @@ def email_verification(request, token):
     user = get_object_or_404(User, token=token)
     user.is_active = True
     user.save()
-    return HttpResponse("подтвержден")
+    return redirect('users:login')
 
 
 class UserListView(ListView):

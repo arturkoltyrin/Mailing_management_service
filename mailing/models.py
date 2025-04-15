@@ -5,10 +5,10 @@ from users.models import User
 class ReceiveMail(models.Model):
     """Модель «Получатель рассылки»:"""
 
-    mail = models.EmailField(max_length=255, verbose_name="Письмо", unique=True)
-    fio = models.CharField(max_length=255, verbose_name="ФИО")
+    mail = models.EmailField(unique=True)
+    fio = models.CharField(max_length=255, verbose_name="ФИО", blank=True, null=True)
     comment = models.TextField(verbose_name="Комментарии", null=True, blank=True)
-    is_active = models.BooleanField(default=True, verbose_name="активность")
+
     owner = models.ForeignKey(
         User,
         verbose_name="Получатель",
@@ -71,7 +71,12 @@ class Mailing(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="активна", null=True, blank=True)
     message = models.ForeignKey(Message, on_delete=models.CASCADE, verbose_name="Сообщение", related_name="mailings", null=True, blank=True)
     client = models.ManyToManyField(ReceiveMail, verbose_name="Клиент",)
-    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Владелец")
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, editable=False, null=True, blank=True, verbose_name="Владелец")
+
+    def save(self, *args, **kwargs):
+        if not self.owner:
+            self.owner = self.request.user  # устанавливаем владельца автоматически
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.id}"
