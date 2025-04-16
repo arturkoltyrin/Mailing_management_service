@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from users.models import User
-from mailing.models import Message, ReceiveMail, Mailing  # адаптируй под свои модели
+from mailing.models import Message, ReceiveMail, Mailing
 
 class Command(BaseCommand):
     help = "Создаёт модератора и группу с нужными правами"
