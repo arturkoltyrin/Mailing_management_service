@@ -57,15 +57,16 @@ class MailingListView(ListView):
         return get_mailing_from_cache()
 
 
-class MailingCreateView(LoginRequiredMixin, CreateView):
-    model = Mailing
-    form_class = MailingForm
-    template_name = 'mailing/mailing_form.html'
-    success_url = reverse_lazy("mailing:mailing_list")
+class MessageCreateView(LoginRequiredMixin, CreateView):
+    model = Message
+    form_class = MessageForm
+    template_name = 'mailing/message_form.html'
+    success_url = reverse_lazy("mailing:message_list")
 
     def form_valid(self, form):
-        form.instance.owner = self.request.user  # автоматически проставляется владелец
+        form.instance.owner = self.request.user  # устанавливаем владельца
         return super().form_valid(form)
+
 
 
 
@@ -88,6 +89,12 @@ class MailingUpdateView(LoginRequiredMixin, UpdateView):
         if user.has_perm("mailing.set_is_active"):
             return MailingModeratorForm
         return MailingForm
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['client'].queryset = ReceiveMail.objects.filter(owner=self.request.user)
+        form.fields['message'].queryset = Message.objects.filter(owner=self.request.user)
+        return form
 
 
 class MailingDeleteView(LoginRequiredMixin, DeleteView):
@@ -164,12 +171,6 @@ class MessageListView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         return Message.objects.filter(owner=self.request.user)
 
-    def get_queryset(self, *args, **kwargs):
-
-        queryset = super().get_queryset()
-        print(queryset)  # Для отладки
-        return queryset
-
 
 class MessageDetailView(LoginRequiredMixin, DetailView):
     model = Message
@@ -245,3 +246,20 @@ class MailingAttemptListView(LoginRequiredMixin, ListView):
         elif self.request.user.groups.filter(name="Пользователи").exists():
             return super().get_queryset().filter(owner=self.request.user)
         raise PermissionDenied
+
+class MailingCreateView(LoginRequiredMixin, CreateView):
+    model = Mailing
+    form_class = MailingForm
+    template_name = 'mailing/mailing_form.html'
+    success_url = reverse_lazy("mailing:mailing_list")
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['client'].queryset = ReceiveMail.objects.filter(owner=self.request.user)
+        form.fields['message'].queryset = Message.objects.filter(owner=self.request.user)
+        return form
+
