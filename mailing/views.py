@@ -241,13 +241,12 @@ class MailingAttemptCreateView(LoginRequiredMixin, CreateView):
 class MailingAttemptListView(LoginRequiredMixin, ListView):
     model = AttemptMailing
     template_name = "mailing/attemptmailing_list.html"
+    context_object_name = "object_list"
 
-    def get_queryset(self, *args, **kwargs):
-        if self.request.user:
-            return super().get_queryset()
-        elif self.request.user.groups.filter(name="Пользователи").exists():
-            return super().get_queryset().filter(owner=self.request.user)
-        raise PermissionDenied
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return AttemptMailing.objects.all()  # администратор видит все
+        return AttemptMailing.objects.filter(mailing__owner=self.request.user)  # обычный пользователь видит только свои
 
 class MailingCreateView(LoginRequiredMixin, CreateView, UserPassesTestMixin):
     model = Mailing
