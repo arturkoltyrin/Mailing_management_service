@@ -28,7 +28,7 @@ def run_mail(request, pk):
                 mailing=mailing,
             )
         except Exception as e:
-            print(f"Ошибка при отправке письма для {recipient.email}: {str(e)}")
+            print(f"Ошибка при отправке письма для {recipient.mail}: {str(e)}")
             AttemptMailing.objects.create(
                 date_attempt=timezone.now(),
                 status=AttemptMailing.STATUS_NOK,

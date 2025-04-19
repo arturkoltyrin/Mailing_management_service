@@ -24,12 +24,18 @@ class MailingForm(StyleFormMixin, ModelForm):
         model = Mailing
         fields = ['message', 'client']
 
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)  # принимаем request
+        super().__init__(*args, **kwargs)
+        if self.request:
+            self.fields['message'].queryset = Message.objects.filter(owner=self.request.user)
+
 
 class MessageForm(StyleFormMixin, ModelForm):
 
     class Meta:
         model = Message
-        fields = "__all__"
+        fields = ["subject", "content"]
 
 
 class ReceiveMailForm(StyleFormMixin, ModelForm):

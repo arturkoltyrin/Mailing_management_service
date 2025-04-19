@@ -1,27 +1,19 @@
 {% extends 'mailing/base.html' %}
-{% load my_tags %}
 {% block content %}
-<div class="album py-5 bg-body-tertiary">
-    <div class="container">
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-            <div class="col">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <p class="card-text"> Первая отправка: {{ object.first_sending}}</p>
-                        <p class="card-text">Окончание отправки: {{ object.end_sending}}</p>
-                        <p class="card-text">Статус отправки: {{ object.status}}</p>
-                        <p class="card-text">Сообщение: {{ object.message}}</p>
-                         <p class="card-text">Клиент: {{ object.client}}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="btn-group">
-                                <a class="btn btn-primary" href="{% url 'mailing:mailing_list' %}"
-                                   role="button">Назад</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+<div class="container marketing mt-5">
+    <div class="row">
+
+        <div class="col-lg-4">
+
+            <p>Первая отправка {{object.first_sending }}<p>
+            <p>Окончание отправки {{object.end_sending }}<p>
+            <p>Статус {{object.status}}<p>
+            <p>Статус {{object.is_active}}<p>
+            <p>Статус {{object.owner}}<p>
+            <p>Сообщение {{object.message}}</p>
+            <p><a class="btn btn-secondary" href="{% url 'mailing:mailing_list' %}">Назад</a></p>
+        </div><!-- /.col-lg-4 -->
+
+    </div><!-- /.row -->
+</div><!-- /.container -->
+{% endblock %}}
