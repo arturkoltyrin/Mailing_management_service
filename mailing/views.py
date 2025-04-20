@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, request
 from django.shortcuts import get_object_or_404, render, redirect
@@ -15,7 +15,7 @@ def base(request):
 
 
 # Главная страница
-class homeView(TemplateView):
+class homeView(LoginRequiredMixin, TemplateView):
     template_name = "mailing/home.html"
 
     def get_context_data(self, **kwargs):
@@ -149,20 +149,25 @@ class ReceiveMailCreateView(LoginRequiredMixin, CreateView):
 class ReceiveMailUpdateView(LoginRequiredMixin, UpdateView):
     model = ReceiveMail
     form_class = ReceiveMailForm
-
     success_url = reverse_lazy("mailing:receivemail_list")
 
-    def get_form_class(self):
-        user = self.request.user
-        if user.has_perm("mailing.can_blocking_client"):
-            return ReceiveMailModeratorForm
-        return ReceiveMailForm
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.owner != self.request.user and not self.request.user.is_superuser:
+            raise PermissionDenied
+        return obj
 
 
 class ReceiveMailingDeleteView(LoginRequiredMixin, DeleteView):
     model = ReceiveMail
     template_name = "mailing/receivemail_delete.html"
     success_url = reverse_lazy("mailing:receivemail_list")
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.owner != self.request.user and not self.request.user.is_superuser:
+            raise PermissionDenied
+        return obj
 
 
 # CRUD для сообщений
@@ -187,7 +192,7 @@ class MessageDetailView(LoginRequiredMixin, DetailView):
         return self.object
 
 
-class MessageCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
+class MessageCreateView(LoginRequiredMixin, CreateView):
     model = Message
     form_class = MessageForm
     template_name = 'mailing/message_form.html'
@@ -198,9 +203,6 @@ class MessageCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         recipient.owner = self.request.user
         recipient.save()
         return super().form_valid(form)
-
-    def test_func(self):
-        return self.request.user.is_superuser
 
 
 class MessageUpdateView(LoginRequiredMixin, UpdateView):
@@ -248,7 +250,7 @@ class MailingAttemptListView(LoginRequiredMixin, ListView):
             return AttemptMailing.objects.all()  # администратор видит все
         return AttemptMailing.objects.filter(mailing__owner=self.request.user)  # обычный пользователь видит только свои
 
-class MailingCreateView(LoginRequiredMixin, CreateView, UserPassesTestMixin):
+class MailingCreateView(LoginRequiredMixin, CreateView):
     model = Mailing
     form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
@@ -260,8 +262,6 @@ class MailingCreateView(LoginRequiredMixin, CreateView, UserPassesTestMixin):
         recipient.save()
         return super().form_valid(form)
 
-    def test_func(self):
-        return self.request.user.groups.filter(name="Пользователи").exists() or self.request.user.is_superuser
 
 
 class ConfirmSendMailingView(LoginRequiredMixin, View):

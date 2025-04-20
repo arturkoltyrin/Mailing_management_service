@@ -25,7 +25,6 @@
             <table class="table table-success table-striped">
                 <thead>
                 <tr>
-                    <th>Фото</th>
                     <th>ФИО получателя</th>
                     <th>email получателя</th>
                     <th>Комментарий</th>
@@ -38,10 +37,7 @@
 
                 {% for object in object_list %}
                 <tr>
-                    <td>
-                        <img src="{{ object.avatar|media_filter }}" alt="Фото" class="rounded" width="40" height="40">
 
-                    </td>
                     <td>{{ object.fio }}</td>
                     <td>{{ object.mail}}</td>
                     <td>{{ object.comment|truncatechars:30 }}</td>
@@ -49,14 +45,10 @@
                     <td>{{ object.owner }}</td>
                     {% endif %}
                     <td>
-                        <a class="btn btn-primary btn-sm"
-                           href="{% url 'mailing:receivemail_detail' object.pk%}">Посмотреть
-                            &raquo;</a>
-                        {% if user.owner %}
-                        <a class="btn btn-primary btn-sm"
-                           href="{% url 'mailing:receivemail_update' object.pk%}">Редактировать
-                            &raquo;</a>
-                        <a class="btn btn-danger btn-sm" href="{% url 'mailing:receivemail_delete' object.pk%}">Удалить</a>
+                        <a class="btn btn-primary btn-sm" href="{% url 'mailing:receivemail_detail' object.pk%}">Посмотреть</a>
+                        {% if object.owner == user or user.is_superuser %}
+                            <a class="btn btn-primary btn-sm" href="{% url 'mailing:receivemail_update' object.pk%}">Редактировать</a>
+                            <a class="btn btn-danger btn-sm" href="{% url 'mailing:receivemail_delete' object.pk%}">Удалить</a>
                         {% endif %}
                     </td>
 
