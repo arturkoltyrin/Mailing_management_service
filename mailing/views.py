@@ -14,7 +14,7 @@ def base(request):
     return render(request, "base.html")
 
 
-
+# Главная страница
 class homeView(LoginRequiredMixin, TemplateView):
     template_name = "mailing/home.html"
 
@@ -28,25 +28,26 @@ class homeView(LoginRequiredMixin, TemplateView):
         return context_data
 
 
-
+# Шаблон контакты
 class Contacts(TemplateView):
 
     template_name = "mailing/contacts.html"
 
     def contacts(request):
         if request.method == "POST":
-            name = request.POST.get("name")
-            message = request.POST.get("message")
+            name = request.POST.get("name")  # получаем имя
+            message = request.POST.get("message")  # получаем сообщение
             return HttpResponse(f"Спасибо, {name}! {message} Сообщение получено.")
         return render(request, "mailing/contacts.html")
 
 
-
+# Страница ответа на отправленное сообщение
 class Messages(ListView):
 
     template_name = "mailing/message_list.html"
 
 
+# CRUD для рассылок
 class MailingListView(LoginRequiredMixin, ListView):
     model = Mailing
     template_name = "mailing/mailing_list.html"
@@ -65,8 +66,10 @@ class MessageCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("mailing:message_list")
 
     def form_valid(self, form):
-        form.instance.owner = self.request.user
+        form.instance.owner = self.request.user  # устанавливаем владельца
         return super().form_valid(form)
+
+
 
 
 class MailingDetailView(LoginRequiredMixin, DetailView):
@@ -102,3 +105,170 @@ class MailingDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("mailing:mailing_list")
 
 
+# CRUD для получателей
+
+
+class ReceiveMailListView(LoginRequiredMixin, ListView):
+    model = ReceiveMail
+    template_name = 'mailing/receivemail_list.html'
+    context_object_name = 'Получатель'
+
+    def get_queryset(self):
+        return ReceiveMail.objects.filter(owner=self.request.user)
+
+
+class ReceiveMailDetailView(LoginRequiredMixin, DetailView):
+    model = ReceiveMail
+    form_class = ReceiveMailModeratorForm
+
+    def get_object(self, queryset=None):
+        self.object = super().get_object(queryset)
+        if self.request.user.is_superuser:
+            return self.object
+        if self.object.owner != self.request.user and not self.request.user.is_superuser:
+            raise PermissionDenied
+        return self.object
+
+
+class ReceiveMailCreateView(LoginRequiredMixin, CreateView):
+    model = ReceiveMail
+    form_class = ReceiveMailForm
+    template_name = "mailing/receivemail_form.html"
+    success_url = reverse_lazy("mailing:receivemail_list")
+
+    def form_valid(self, form):
+        client = form.save()
+        user = self.request.user
+        client.owner = user
+        client.save()
+
+        return super().form_valid(form)
+
+
+class ReceiveMailUpdateView(LoginRequiredMixin, UpdateView):
+    model = ReceiveMail
+    form_class = ReceiveMailForm
+    success_url = reverse_lazy("mailing:receivemail_list")
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.owner != self.request.user and not self.request.user.is_superuser:
+            raise PermissionDenied
+        return obj
+
+
+class ReceiveMailingDeleteView(LoginRequiredMixin, DeleteView):
+    model = ReceiveMail
+    template_name = "mailing/receivemail_delete.html"
+    success_url = reverse_lazy("mailing:receivemail_list")
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.owner != self.request.user and not self.request.user.is_superuser:
+            raise PermissionDenied
+        return obj
+
+
+# CRUD для сообщений
+class MessageListView(LoginRequiredMixin, ListView):
+    model = Message
+    template_name = 'mailing/message_list.html'
+    context_object_name = 'письмо'
+
+    def get_queryset(self):
+        return Message.objects.filter(owner=self.request.user)
+
+
+class MessageDetailView(LoginRequiredMixin, DetailView):
+    model = Message
+    form_class = MessageForm
+    template_name = 'mailing/message_detail.html'
+
+    def get_object(self, queryset=None):
+        self.object = super().get_object(queryset)
+        if not self.request.user.is_superuser:
+            raise PermissionDenied
+        return self.object
+
+
+class MessageCreateView(LoginRequiredMixin, CreateView):
+    model = Message
+    form_class = MessageForm
+    template_name = 'mailing/message_form.html'
+    success_url = reverse_lazy("mailing:message_list")
+
+    def form_valid(self, form):
+        recipient = form.save()
+        recipient.owner = self.request.user
+        recipient.save()
+        return super().form_valid(form)
+
+
+class MessageUpdateView(LoginRequiredMixin, UpdateView):
+    model = Message
+    form_class = MessageForm
+    template_name = 'mailing/message_form.html'
+    success_url = reverse_lazy("mailing:message_list")
+
+    def get_object(self, queryset=None):
+        self.object = super().get_object(queryset)
+        if not self.request.user.is_superuser:
+            raise PermissionDenied
+        return self.object
+
+
+class MessageDeleteView(LoginRequiredMixin, DeleteView):
+    model = Message
+    template_name = 'mailing/message_delete.html'
+    success_url = reverse_lazy("mailing:message_list")
+
+    def get_object(self, queryset=None):
+        self.object = super().get_object(queryset)
+        if not self.request.user.is_superuser:
+            raise PermissionDenied
+        return self.object
+
+
+class MailingAttemptCreateView(LoginRequiredMixin, CreateView):
+    model = AttemptMailing
+
+    def form_valid(self, form):
+        recipient = form.save()
+        recipient.owner = self.request.user
+        recipient.save()
+        return super().form_valid(form)
+
+
+class MailingAttemptListView(LoginRequiredMixin, ListView):
+    model = AttemptMailing
+    template_name = "mailing/attemptmailing_list.html"
+    context_object_name = "object_list"
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return AttemptMailing.objects.all()  # администратор видит все
+        return AttemptMailing.objects.filter(mailing__owner=self.request.user)  # обычный пользователь видит только свои
+
+class MailingCreateView(LoginRequiredMixin, CreateView):
+    model = Mailing
+    form_class = MailingForm
+    template_name = 'mailing/mailing_form.html'
+    success_url = reverse_lazy("mailing:message_list")
+
+    def form_valid(self, form):
+        recipient = form.save()
+        recipient.owner = self.request.user
+        recipient.save()
+        return super().form_valid(form)
+
+
+
+class ConfirmSendMailingView(LoginRequiredMixin, View):
+    def get(self, request, pk):
+        mailing = get_object_or_404(Mailing, pk=pk)
+        return render(request, 'mailing/send_mail.html', {'mailing': mailing})
+
+    def post(self, request, pk):
+        # Подтверждение отправки
+        run_mail(request, pk)
+        return redirect('mailing:mailing_list')
