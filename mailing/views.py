@@ -70,8 +70,6 @@ class MessageCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-
-
 class MailingDetailView(LoginRequiredMixin, DetailView):
     model = Mailing
     form_class = MailingForm
@@ -185,10 +183,10 @@ class MessageDetailView(LoginRequiredMixin, DetailView):
     template_name = 'mailing/message_detail.html'
 
     def get_object(self, queryset=None):
-        self.object = super().get_object(queryset)
-        if not self.request.user.is_superuser:
+        obj = super().get_object(queryset)
+        if obj.owner != self.request.user and not self.request.user.is_superuser:
             raise PermissionDenied
-        return self.object
+        return obj
 
 
 class MessageCreateView(LoginRequiredMixin, CreateView):
@@ -211,10 +209,10 @@ class MessageUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("mailing:message_list")
 
     def get_object(self, queryset=None):
-        self.object = super().get_object(queryset)
-        if not self.request.user.is_superuser:
+        obj = super().get_object(queryset)
+        if obj.owner != self.request.user and not self.request.user.is_superuser:
             raise PermissionDenied
-        return self.object
+        return obj
 
 
 class MessageDeleteView(LoginRequiredMixin, DeleteView):
@@ -223,10 +221,10 @@ class MessageDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("mailing:message_list")
 
     def get_object(self, queryset=None):
-        self.object = super().get_object(queryset)
-        if not self.request.user.is_superuser:
+        obj = super().get_object(queryset)
+        if obj.owner != self.request.user and not self.request.user.is_superuser:
             raise PermissionDenied
-        return self.object
+        return obj
 
 
 class MailingAttemptCreateView(LoginRequiredMixin, CreateView):
@@ -253,13 +251,12 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
     model = Mailing
     form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
-    success_url = reverse_lazy("mailing:message_list")
+    success_url = reverse_lazy("mailing:mailing_list")
 
-    def form_valid(self, form):
-        recipient = form.save()
-        recipient.owner = self.request.user
-        recipient.save()
-        return super().form_valid(form)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
 
 

@@ -3,6 +3,7 @@ from django.forms import BooleanField, ModelForm
 from .models import AttemptMailing, Mailing, Message, ReceiveMail
 
 
+
 class StyleFormMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,10 +26,11 @@ class MailingForm(StyleFormMixin, ModelForm):
         fields = ['message', 'client']
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)  # принимаем request
+        self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         if self.request:
             self.fields['message'].queryset = Message.objects.filter(owner=self.request.user)
+            self.fields['client'].queryset = ReceiveMail.objects.filter(owner=self.request.user)
 
 
 class MessageForm(StyleFormMixin, ModelForm):
