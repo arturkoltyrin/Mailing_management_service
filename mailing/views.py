@@ -73,7 +73,7 @@ class MessageCreateView(LoginRequiredMixin, CreateView):
 class MailingDetailView(LoginRequiredMixin, DetailView):
     model = Mailing
     form_class = MailingForm
-    template_name = "mailing/receivemail_list.html"
+    template_name = "mailing/mailing_detail.html"
 
     def get_queryset(self):
         return get_mailing_from_cache()
@@ -132,7 +132,7 @@ class ReceiveMailCreateView(LoginRequiredMixin, CreateView):
     model = ReceiveMail
     form_class = ReceiveMailForm
     template_name = "mailing/receivemail_form.html"
-    success_url = reverse_lazy("mailing:receivemail_list")
+    success_url = reverse_lazy("mailing:receivemail_form")
 
     def form_valid(self, form):
         client = form.save()
@@ -257,15 +257,3 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
-
-
-
-class ConfirmSendMailingView(LoginRequiredMixin, View):
-    def get(self, request, pk):
-        mailing = get_object_or_404(Mailing, pk=pk)
-        return render(request, 'mailing/send_mail.html', {'mailing': mailing})
-
-    def post(self, request, pk):
-        # Подтверждение отправки
-        run_mail(request, pk)
-        return redirect('mailing:mailing_list')

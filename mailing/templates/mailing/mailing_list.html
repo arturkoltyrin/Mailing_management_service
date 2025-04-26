@@ -41,16 +41,16 @@
                     <td>{{ object.message.subject }}</td>
                     <td>{{ object.status }}</td>
                     <td>
-                        {% if user.is_superuser or object.owner == user %}
-                        {% if object.is_active %}
-                                <a type="button" class="btn btn-danger btn-sm"
-                                   href="{% url 'mailing:block_mailing' object.pk %}">Заблокировать</a>
+                        {% if user.is_superuser %}
+                            {% if object.is_active %}
+                                    <a type="button" class="btn btn-danger btn-sm"
+                                       href="{% url 'mailing:block_mailing' object.pk %}">Заблокировать</a>
                             {% else %}
-                                <a type="button" class="btn btn-success btn-sm"
-                                   href="{% url 'mailing:block_mailing' object.pk %}">Разблокировать</a>
+                                    <a type="button" class="btn btn-success btn-sm"
+                                       href="{% url 'mailing:block_mailing' object.pk %}">Разблокировать</a>
                             {% endif %}
                         {% else %}
-                        {{object.is_active|yesno:"Активна, Не активна"}}
+                            {{object.is_active|yesno:"Активна, Не активна"}}
                         {% endif %}
                     </td>
                     {% if user.is_authenticated %}
@@ -61,10 +61,10 @@
                         {% if user.is_authenticated %}
                             <a class="btn btn-primary btn-sm" href="{% url 'mailing:mailing_update' object.pk%}">Редактировать</a>
                             <a class="btn btn-danger btn-sm" href="{% url 'mailing:mailing_delete' object.pk%}">Удалить</a>
-                            <a class="btn btn-warning btn-sm" href="{% url 'mailing:confirm_send_mailing' object.pk %}">Отправить рассылку</a>
+
                         {% endif %}
-                        {% if user.is_superuser %}
-                            <a class="btn btn-secondary btn-sm" href="{% url 'mailing:run_mail' object.pk%}">Запустить &raquo;</a>
+                        {% if user.is_superuser or object.owner == user %}
+                            <a class="btn btn-secondary btn-sm" href="{% url 'mailing:run_mail' object.pk%}">Отправить &raquo;</a>
                         {% endif %}
                     </td>
 

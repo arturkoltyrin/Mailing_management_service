@@ -6,8 +6,7 @@
         <div class="col-6">
             <form class="row" method="post" enctype="multipart/form-data">
                 <div class="card">
-                    <h2>Вы прям серьёзно хотите удалить рассылку от: </h2>
-                    <p class="card-text">Категория: {{ object.first_sending }}</p>
+                    <h2>Вы хотите удалить рассылку: </h2>
                     <div class="form-body">
                         {% csrf_token %}
                     </div>

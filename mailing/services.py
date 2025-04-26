@@ -9,39 +9,51 @@ from config.settings import CACHE_ENABLED, EMAIL_HOST_USER
 from mailing.models import AttemptMailing, Mailing
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
+import logging
 
-
+logger = logging.getLogger(__name__)
 
 def run_mail(request, pk):
     """Функция запуска рассылки по требованию"""
     mailing = get_object_or_404(Mailing, id=pk)
     try:
-        # Код отправки рассылки
-        for recipient in mailing.client.all():
-            send_mail(
-                subject=mailing.message.subject,
-                message=mailing.message.content,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[recipient.mail],
-                fail_silently=False,
-            )
-            # Запись истории отправки
-            AttemptMailing.objects.create(
-                date_attempt=timezone.now(),
-                status=AttemptMailing.STATUS_OK,
-                server_response="Email отправлен",
-                mailing=mailing,
-            )
-    except Exception as e:
-        # Запись ошибки
-        AttemptMailing.objects.create(
-            date_attempt=timezone.now(),
-            status=AttemptMailing.STATUS_NOK,
-            server_response=str(e),
-            mailing=mailing,
-        )
+        for recipient in mailing.clients.all():
+            try:
+                # Отправляем письмо каждому получателю
+                send_mail(
+                    subject=mailing.message.subject,
+                    message=mailing.message.content,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[recipient.email],
+                    fail_silently=False,
+                )
+
+                # Создаем успешную попытку отправки для текущего получателя
+                AttemptMailing.objects.create(
+                    date_attempt=timezone.now(),
+                    status=AttemptMailing.STATUS_OK,
+                    response="Email успешно отправлен",
+                    mailing=mailing,
+                    owner=request.user if request.user.is_authenticated else None
+                )
+
+            except Exception as e:
+                logger.error(f'Ошибка отправки письма {recipient}: {e}')
+
+                # Если произошла ошибка отправки этому получателю, создаем неудачную попытку
+                AttemptMailing.objects.create(
+                    date_attempt=timezone.now(),
+                    status=AttemptMailing.STATUS_NOK,
+                    response=f'Ошибка отправки письма: {str(e)}',
+                    mailing=mailing,
+                    owner=request.user if request.user.is_authenticated else None
+                )
+
+        return redirect('mailing:mailing_list')
+
+    except Exception as general_exception:
+        logger.error(f'Общая ошибка рассылки: {general_exception}')
         return HttpResponse("Ошибка отправки рассылки.")
-    return redirect("mailing:mailing_list")
 
 
 def get_mailing_from_cache():

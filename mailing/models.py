@@ -87,9 +87,14 @@ class Mailing(models.Model):
 
 class AttemptMailing(models.Model):
     """Модель «Попытка рассылки»"""
+    STATUS_OK = "ok"
+    STATUS_NOK = "nok"
 
     date_attempt = models.DateTimeField(verbose_name="Дата и время попытки")
-    status = models.CharField(max_length=115, verbose_name="Статус попытки")
+    status = models.CharField(max_length=3, choices=[
+        (STATUS_OK, "Успешно отправлено"),
+        (STATUS_NOK, "Ошибка отправки"),
+    ])
     response = models.TextField(verbose_name="Комментарии", null=True, blank=True)
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE, verbose_name="Рассылка", related_name="mailing")
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Владелец")
