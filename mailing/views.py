@@ -119,6 +119,7 @@ class ReceiveMailListView(LoginRequiredMixin, ListView):
 class ReceiveMailDetailView(LoginRequiredMixin, DetailView):
     model = ReceiveMail
     form_class = ReceiveMailModeratorForm
+    template_name = 'mailing/mailing_detail.html'
 
     def get_object(self, queryset=None):
         self.object = super().get_object(queryset)
@@ -261,22 +262,22 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
 
 
 
-# class MailingSendView(LoginRequiredMixin, View):
-#     def get(self, request, pk, *args, **kwargs):
-#         mailing = get_object_or_404(Mailing, pk=pk)
-#         return render(request, 'mailing/send_mail.html', {'mailing': mailing})
-#
-#     def post(self, request, pk, *args, **kwargs):
-#         mailing = get_object_or_404(Mailing, pk=pk)
-#         if mailing and mailing.status == "created" or mailing.status == "launched":
-#             recipients = mailing.recipients.all()
-#             for recipient in recipients:
-#                 try:
-#                     send_mail(mailing.message.topic, mailing.message.text, EMAIL_HOST_USER, [recipient.email])
-#                     AttemptSending.objects.create(mailing=mailing, status="success",
-#                                                   response="Сообщение отправлено успешно")
-#                 except Exception as e:
-#                     AttemptSending.objects.create(mailing=mailing, status="not_success", response=str(e))
-#         mailing.status = "launched"
-#         mailing.save()
-#         return redirect("mailing:mailing_list")
+class MailingSendView(LoginRequiredMixin, View):
+    def get(self, request, pk, *args, **kwargs):
+        mailing = get_object_or_404(Mailing, pk=pk)
+        return render(request, 'mailing/send_mail.html', {'mailing': mailing})
+
+    def post(self, request, pk, *args, **kwargs):
+        mailing = get_object_or_404(Mailing, pk=pk)
+        if mailing and mailing.status == "created" or mailing.status == "launched":
+            recipients = mailing.client.all()
+            for recipient in recipients:
+                try:
+                    send_mail(mailing.message.topic, mailing.message.content, EMAIL_HOST_USER, [recipient.email])
+                    AttemptMailing.objects.create(mailing=mailing, status="success",
+                                                  response="Сообщение отправлено успешно")
+                except Exception as e:
+                    AttemptMailing.objects.create(mailing=mailing, status="not_success", response=str(e))
+        mailing.status = "launched"
+        mailing.save()
+        return redirect("mailing:mailing_list")

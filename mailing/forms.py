@@ -58,4 +58,3 @@ class MailingModeratorForm(StyleFormMixin, ModelForm):
     class Meta:
         model = Mailing
         fields = "__all__"
-
