@@ -106,3 +106,24 @@ class AttemptMailing(models.Model):
         verbose_name = "попытка"
         verbose_name_plural = "попытки"
         ordering = ["date_attempt", "status"]
+
+
+# class AttemptSending(models.Model):
+#     time = models.DateTimeField(verbose_name="Дата и время попытки", auto_now_add=True)
+#
+#     STATUS_OF_ATTEMPT = [
+#         ('success', 'Успешно'),
+#         ('not_success', 'Не успешно'),
+#     ]
+#     status = models.CharField(choices=STATUS_OF_ATTEMPT, default='not_success', verbose_name="Статус попытки")
+#     response = models.TextField(verbose_name="Ответ почтового сервера", null=True, blank=True)
+#     mailing = models.ForeignKey(Mailing, on_delete=models.SET_NULL, verbose_name="Рассылка", null=True, blank=True,
+#                                 related_name="attempts")
+#
+#     def __str__(self):
+#         return f'Попытка №{self.pk}'
+#
+#     class Meta:
+#         verbose_name = "Попытка"
+#         verbose_name_plural = "Попытки"
+#         ordering = ["time"]

@@ -8,7 +8,8 @@ from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from mailing.models import AttemptMailing, Mailing, Message, ReceiveMail
 from .forms import MailingForm, MailingModeratorForm, MessageForm, ReceiveMailForm, ReceiveMailModeratorForm
 from .services import run_mail, get_mailing_from_cache
-
+from django.core.mail import send_mail
+from config.settings import EMAIL_HOST_USER
 
 def base(request):
     return render(request, "base.html")
@@ -257,3 +258,25 @@ class MailingCreateView(LoginRequiredMixin, CreateView):
         kwargs = super().get_form_kwargs()
         kwargs['request'] = self.request
         return kwargs
+
+
+
+# class MailingSendView(LoginRequiredMixin, View):
+#     def get(self, request, pk, *args, **kwargs):
+#         mailing = get_object_or_404(Mailing, pk=pk)
+#         return render(request, 'mailing/send_mail.html', {'mailing': mailing})
+#
+#     def post(self, request, pk, *args, **kwargs):
+#         mailing = get_object_or_404(Mailing, pk=pk)
+#         if mailing and mailing.status == "created" or mailing.status == "launched":
+#             recipients = mailing.recipients.all()
+#             for recipient in recipients:
+#                 try:
+#                     send_mail(mailing.message.topic, mailing.message.text, EMAIL_HOST_USER, [recipient.email])
+#                     AttemptSending.objects.create(mailing=mailing, status="success",
+#                                                   response="Сообщение отправлено успешно")
+#                 except Exception as e:
+#                     AttemptSending.objects.create(mailing=mailing, status="not_success", response=str(e))
+#         mailing.status = "launched"
+#         mailing.save()
+#         return redirect("mailing:mailing_list")

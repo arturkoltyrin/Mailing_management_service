@@ -8,6 +8,7 @@ from mailing.views import (Contacts, MailingAttemptCreateView, MailingAttemptLis
                            MessageDetailView, MessageListView,
                            MessageUpdateView, ReceiveMailCreateView, ReceiveMailDetailView, ReceiveMailingDeleteView,
                            ReceiveMailListView, ReceiveMailUpdateView, homeView, Messages)
+                           # MailingSendView
 
 app_name = MailingConfig.name
 
@@ -35,4 +36,5 @@ urlpatterns = [
     path("send/create/", MailingAttemptCreateView.as_view(), name="send_create"),
     path("attempt/", MailingAttemptListView.as_view(), name="attempt"),
     path("block_mailing/<int:pk>", block_mailing, name="block_mailing"),
+    # path("mailing/<int:pk>/", MailingSendView.as_view(), name="send_mail"),
 ]
