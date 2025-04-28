@@ -1,0 +1,33 @@
+{% extends 'mailing/base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <h1 class="mt-5">Главная страница</h1>
+    <p class="lead"></p>
+  </div>
+  <div class="row mb-2">
+    <div class="col-md-12">
+
+        <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+            <div class="row">
+                <div class="col-6">
+                    <form class="row" method="post" enctype="multipart/form-data">
+                        <div class="card">
+                            <p class="card-text">Ваше сообщение получено!</p>
+                            <div class="card-body"></div>
+                            <div class="row mb-2">
+                            <div class="col-md-12">
+                                <a class="btn btn-dark" href="{% url 'mailing:home' %}" role="button">Главная</a>
+                                <a class="btn btn-dark" href="{% url 'mailing:contacts' %}" role="button">Контакты</a>
+                            </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

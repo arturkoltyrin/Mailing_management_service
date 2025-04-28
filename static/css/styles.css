@@ -1,0 +1,5 @@
+/* styles.css */
+.navbar .nav-link {
+    color: black !important; /* Черный цвет текста */
+    font-size: 25px !important; /* Увеличенный размер шрифта */
+}

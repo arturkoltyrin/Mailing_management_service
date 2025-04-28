@@ -1,0 +1,15 @@
+{% extends 'mailing/base.html' %}
+{% block content %}
+<div class="container marketing mt-5">
+    <div class="row">
+
+        <div class="col-lg-4">
+
+            <p>Электронная почта: {{object.mail}}<p>
+            <p>ФИО: {{object.fio}}<p>
+            <p><a class="btn btn-secondary" href="{% url 'mailing:receivemail_list' %}">Назад</a></p>
+        </div><!-- /.col-lg-4 -->
+
+    </div><!-- /.row -->
+</div><!-- /.container -->
+{% endblock %}}
